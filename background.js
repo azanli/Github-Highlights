@@ -17,7 +17,7 @@ const state = {
   ssURL: '',
 };
 
-chrome.storage.sync.get(['ssURL', 'spinnerExpireDate', 'tabId'], function(result) {
+chrome.storage.sync.get(['ssURL', 'spinnerExpireDate', 'tabId', 'liked'], function(result) {
   if (result['ssURL']) {
     document.getElementById('url-input').value = result['ssURL'];
     state.ssURL = result['ssURL'];
@@ -30,7 +30,18 @@ chrome.storage.sync.get(['ssURL', 'spinnerExpireDate', 'tabId'], function(result
       }
     });
   }
+  if (result['liked']) {
+    const like = document.getElementById('like');
+    like.innerHTML('Feedback');
+    like.href = 'mailto:andyzanli@gmail.com';
+  }
 });
+
+function handleLike() {
+  chrome.storage.sync.set({ liked: true });
+  const like = document.getElementById('like');
+  like.innerHTML('Thank you');
+}
 
 function saveTime(time) {
   chrome.storage.sync.set({ spinnerExpireDate: time });
@@ -77,6 +88,12 @@ function hideSpinner() {
 
 document.addEventListener('DOMContentLoaded', function() {
 
+  const handleOnLike = document.getElementById('like');
+  handleOnLike.addEventListener('click', function() {
+    handleLike();
+    handleOnLike.removeEventListener('click');
+  });
+
   const toggleNamesOn = document.getElementById('names-on');
   toggleNamesOn.addEventListener('click', function() {
     toggleNames('on');
@@ -107,6 +124,10 @@ document.addEventListener('DOMContentLoaded', function() {
           console.log(`Removed Google Spreadsheet URL from storage.}`)
         });
       }
+      return;
+    }
+    if (!ssURL.includes('docs.google')) {
+      // Invalid spreadsheet url
       return;
     }
     loadSpinner();
