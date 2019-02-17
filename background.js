@@ -282,7 +282,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (changeInfo.status == 'complete') {
       chrome.tabs.getSelected(null, function(tab) {
         const { url } = tab;
-        if ((url[8] === 'g' || url[12] === 'g') && url.includes('github')) {
+        // Specifically filter out 'google' as that is the most visited website on the internet.
+        if (((url[8] === 'g' && url[9] !== 'o') || (url[12] === 'g' && url[13] !== 'o')) && url.includes('github')) {
           chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             chrome.tabs.executeScript(tab.id, {
               "file": "content.js"
