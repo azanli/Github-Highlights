@@ -22,13 +22,25 @@
       <h1 class="title">G<span class="title-color-light">i</span>t H<span class="title-color-light">i</span></span>ghl<span class="title-color">i</span>ghts</h1>
     </div>
   
-    <div class="color-container">
-      <div class="color-label-container">
-        <p class="color-label">Color code:</p>
+    <div class="setting-container">
+      <div class="setting-label-container">
+        <p class="setting-label">Color code:</p>
       </div>
-      <div class="color-input-container">
+      <div class="setting-input-container">
         <input autofocus id="color-input" type="text" />
         <span id="color-box"/>
+      </div>
+    </div>
+
+    <div class="setting-container">
+      <div class="setting-label-container">
+        <p class="setting-label">Highlight width:</p>
+      </div>
+      <div class="setting-input-container justify-start">
+        <div>
+          <div id="highlight-sample"/>
+        </div>
+        <input type="range" min="15" max="250" value="15" class="highlight-slider" id="highlight-range">
       </div>
     </div>
 
