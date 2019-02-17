@@ -53,11 +53,14 @@
 
 /* The slider itself */
 .highlight-slider {
+  align-self: center;
+  display: flex;
   -webkit-appearance: none;
-  width: 250px;
+  width: 95%;
   height: 15px;
   border-radius: 5px;   
   background: #d3d3d3;
+  margin-bottom: 2em;
   outline: none;
   opacity: 0.7;
   -webkit-transition: .2s;
@@ -76,7 +79,7 @@
   width: 25px;
   height: 25px;
   border-radius: 50%; 
-  background: #4CAF50;
+  background: #59AE4B;
   cursor: pointer;
 }
 
@@ -84,12 +87,8 @@
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  background: #4CAF50;
+  background: #59AE4B;
   cursor: pointer;
-}
-
-.justify-start {
-  justify-content: flex-start;
 }
 
 .setting-container {
@@ -118,6 +117,10 @@
   color: #24282E;
   font-size: 1.2em;
   font-weight: bold;
+}
+
+.setting-shrunk {
+  height: 1em;
 }
 
 #start-loader {
