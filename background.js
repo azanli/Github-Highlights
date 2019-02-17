@@ -23,12 +23,7 @@ window.onload = async function() {
   document.getElementById("color-input").setAttribute('placeholder', currentColor);
 
   const startHandler = document.getElementById('start-button');
-  startHandler.addEventListener('click', () => {
-    setColor();
-    setWidth();
-    loadSpinner();
-    setTimeout(hideSpinner, 1000);
-  });
+  startHandler.addEventListener('click', saveSettings);
 
   const slider = document.getElementById("highlight-range");
   slider.value =extractDigits(currentWidth);
@@ -42,6 +37,12 @@ window.onload = async function() {
   slider.oninput = function() {
     sample.style.width = `${this.value}px`;
   }
+
+  document.addEventListener('keyup', function (e) {
+    if (e.which == 13) {
+      saveSettings();
+    }
+  });
 }
 
 function getUrlParameter(sParam) {
@@ -65,6 +66,13 @@ function getSettings() {
       }
     });
   });
+}
+
+function saveSettings() {
+  setColor();
+  setWidth();
+  loadSpinner();
+  setTimeout(hideSpinner, 1000);
 }
 
 function setWidth() {
