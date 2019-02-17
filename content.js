@@ -47,7 +47,7 @@ async function exec() {
       highlight.style.height = `${data[dataArray[i]]}px`;
       highlight.style.position = 'absolute';
       highlight.style.top = `${top}px`;
-      highlight.style.width = width;
+      highlight.style.width = '100%';
       scrollbar.appendChild(highlight);
     }
     body.appendChild(scrollbar);
