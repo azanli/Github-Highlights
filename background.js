@@ -10,154 +10,245 @@ _gaq.push(['_trackPageview']);
   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 })();
 
-const state = {
-  names: true,
-  logs: true,
-  script: 'https://script.google.com/macros/s/AKfycbwE3ELgyoCZPLd2tg6RxQuqX8tHJ4uiytbVxGLO9U7Z8YHOGnI/exec',
-  ssURL: '',
-};
+window.onload = async function() {
+  let isPopup = getUrlParameter('popup') === 'true';
+  if (!isPopup) return;
 
-chrome.storage.sync.get(['ssURL', 'spinnerExpireDate', 'tabId', 'liked'], function(result) {
-  if (result['ssURL']) {
-    document.getElementById('url-input').value = result['ssURL'];
-    state.ssURL = result['ssURL'];
+  const currentColor = await getColor();
+  const colorBox = document.getElementById("color-box");
+  colorBox.style.backgroundColor = currentColor;
+
+  document.getElementById("color-input").setAttribute('placeholder', currentColor);
+
+  const startHandler = document.getElementById('start-button');
+  startHandler.addEventListener('click', () => {
+    setColor();
+    loadSpinner();
+    setTimeout(hideSpinner, 1000);
+  });
+}
+
+function getUrlParameter(sParam) {
+  var sPageURL = window.location.search.substring(1);
+  var sURLVariables = sPageURL.split('&');
+  for (var i = 0; i < sURLVariables.length; i++) {
+    var sParameterName = sURLVariables[i].split('=');
+    if (sParameterName[0] == sParam) {
+      return sParameterName[1];
+    }
   }
-  if (result['spinnerExpireDate'] && Date.now() < result['spinnerExpireDate']) {
-    chrome.tabs.getSelected(null, function(tab) {
-      if (tab.id === result['tabId']) {
-        loadSpinner();
-        setTimeout(hideSpinner, result['spinnerExpireDate'] - Date.now());
+}
+
+function getColor() {
+  return new Promise(function(resolve) {
+    chrome.storage.sync.get('color', function(result) {
+      if (result['color']) {
+        resolve(result['color']);
+      } else {
+        resolve('#F1BC43');
       }
     });
-  }
-  if (result['liked']) {
-    const like = document.getElementById('like');
-    like.innerHTML('Feedback');
-    like.href = 'mailto:andyzanli@gmail.com';
-  }
-});
-
-function handleLike() {
-  chrome.storage.sync.set({ liked: true });
-  const like = document.getElementById('like');
-  like.innerHTML('Thank you');
+  });
 }
 
-function saveTime(time) {
-  chrome.storage.sync.set({ spinnerExpireDate: time });
-}
-
-function saveTabId(tabId) {
-  chrome.storage.sync.set({ tabId });
-}
-
-function toggleNames(toggle) {
-  if (toggle === 'on') {
-    document.getElementById('names-on').style['background-color'] = '#4285F4';
-    document.getElementById('names-off').style['background-color'] = '#d3d3d3';
-    state['names'] = true;
+function setColor() {
+  let newColor = document.getElementById("color-input").value.toLowerCase().replace(/\s/g, '');
+  if (!newColor) return;
+  if (/[#-]\W/g.test(newColor)) return;
+  if (newColor[0] === '#') {
+    if (newColor.length > 7) return;
   } else {
-    document.getElementById('names-off').style['background-color'] = '#4285F4';
-    document.getElementById('names-on').style['background-color'] = '#d3d3d3';
-    state['names'] = false;
+    const validColors = {
+      'aliceBlue': true,
+      'antiqueWhite': true,
+      'aqua': true,
+      'aquamarine': true,
+      'azure': true,
+      'beige': true,
+      'bisque': true,
+      'black': true,
+      'blanchedalmond': true,
+      'blue': true,
+      'blueViolet': true,
+      'brown': true,
+      'burlyWood': true,
+      'cadetblue': true,
+      'chartreuse': true,
+      'chocolate': true,
+      'coral': true,
+      'cornflowerblue': true,
+      'cornsilk': true,
+      'crimson': true,
+      'cyan': true,
+      'darkblue': true,
+      'darkcyan': true,
+      'darkgoldenrod': true,
+      'darkgray': true,
+      'darkgrey': true,
+      'darkgreen': true,
+      'darkkhaki': true,
+      'darkmagenta': true,
+      'darkolivegreen': true,
+      'darkorange': true,
+      'darkorchid': true,
+      'darkred': true,
+      'darksalmon': true,
+      'darkseagreen': true,
+      'darkslateblue': true,
+      'darkslategray': true,
+      'darkslategrey': true,
+      'darkturquoise': true,
+      'darkviolet': true,
+      'deeppink': true,
+      'deepskyblue': true,
+      'dimgray': true,
+      'dimgrey': true,
+      'dodgerblue': true,
+      'firebrick': true,
+      'floralwhite': true,
+      'forestgreen': true,
+      'fuchsia': true,
+      'gainsboro': true,
+      'ghostwhite': true,
+      'gold': true,
+      'goldenrod': true,
+      'gray': true,
+      'grey': true,
+      'green': true,
+      'greenyellow': true,
+      'honeydew': true,
+      'hotpink': true,
+      'indianred ': true,
+      'indigo ': true,
+      'ivory': true,
+      'khaki': true,
+      'lavender': true,
+      'lavenderblush': true,
+      'lawngreen': true,
+      'lemonchiffon': true,
+      'lightblue': true,
+      'lightcoral': true,
+      'lightcyan': true,
+      'lightgoldenrodyellow': true,
+      'lightgray': true,
+      'lightgrey': true,
+      'lightgreen': true,
+      'lightpink': true,
+      'lightsalmon': true,
+      'lightseagreen': true,
+      'lightskyblue': true,
+      'lightslategray': true,
+      'lightslategrey': true,
+      'lightsteelblue': true,
+      'lightyellow': true,
+      'lime': true,
+      'limegreen': true,
+      'linen': true,
+      'magenta': true,
+      'maroon': true,
+      'mediumaquamarine': true,
+      'mediumblue': true,
+      'mediumorchid': true,
+      'mediumpurple': true,
+      'mediumseagreen': true,
+      'mediumslateblue': true,
+      'mediumspringgreen': true,
+      'mediumturquoise': true,
+      'mediumvioletred': true,
+      'midnightblue': true,
+      'mintcream': true,
+      'mistyrose': true,
+      'moccasin': true,
+      'navajowhite': true,
+      'navy': true,
+      'oldlace': true,
+      'olive': true,
+      'olivedrab': true,
+      'orange': true,
+      'orangered': true,
+      'orchid': true,
+      'palegoldenrod': true,
+      'palegreen': true,
+      'paleturquoise': true,
+      'palevioletred': true,
+      'papayawhip': true,
+      'peachpuff': true,
+      'peru': true,
+      'pink': true,
+      'plum': true,
+      'powderblue': true,
+      'purple': true,
+      'rebeccapurple': true,
+      'red': true,
+      'rosybrown': true,
+      'royalblue': true,
+      'saddlebrown': true,
+      'salmon': true,
+      'sandybrown': true,
+      'seagreen': true,
+      'seashell': true,
+      'sienna': true,
+      'silver': true,
+      'skyblue': true,
+      'slateblue': true,
+      'slategray': true,
+      'slategrey': true,
+      'snow': true,
+      'springgreen': true,
+      'steelblue': true,
+      'tan': true,
+      'teal': true,
+      'thistle': true,
+      'tomato': true,
+      'turquoise': true,
+      'violet': true,
+      'wheat': true,
+      'white': true,
+      'whiteSmoke': true,
+      'yellow': true,
+      'yellowGreen': true,
+    };
+
+    if (!validColors[newColor]) {
+      // Check whether this is a valid hexadecimal
+      const pass = checkHex(newColor);
+      if (!pass) return;
+
+      newColor = `#${newColor}`;
+    }
   }
+  chrome.storage.sync.set({ color: newColor });
 }
 
-function toggleLogs(toggle) {
-  if (toggle === 'on') {
-    document.getElementById('logs-on').style['background-color'] = '#4285F4';
-    document.getElementById('logs-off').style['background-color'] = '#d3d3d3';
-    state['logs'] = true;
-  } else {
-    document.getElementById('logs-off').style['background-color'] = '#4285F4';
-    document.getElementById('logs-on').style['background-color'] = '#d3d3d3';
-    state['logs'] = false;
-  }
+function checkHex(color) {
+  if (color.length > 6) return false;
+  if (/[g-z]/g.test(color)) return false;
+  return true;
 }
 
 function loadSpinner() {
   document.getElementById('start-loader').style.display = 'block';
   document.getElementById('start-text').style.display = 'none';
-  state.loading = true;
 }
 
 function hideSpinner() {
   document.getElementById('start-loader').style.display = 'none';
   document.getElementById('start-text').style.display = 'block';
+  window.close();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-
-  const handleOnLike = document.getElementById('like');
-  handleOnLike.addEventListener('click', function() {
-    handleLike();
-    handleOnLike.removeEventListener('click');
-  });
-
-  const toggleNamesOn = document.getElementById('names-on');
-  toggleNamesOn.addEventListener('click', function() {
-    toggleNames('on');
-  });
-
-  const toggleNamesOff = document.getElementById('names-off');
-  toggleNamesOff.addEventListener('click', function() {
-    toggleNames('off');
-  });
-
-  const toggleLogsOn = document.getElementById('logs-on');
-  toggleLogsOn.addEventListener('click', function() {
-    toggleLogs('on');
-  });
-
-  const toggleLogsOff = document.getElementById('logs-off');
-  toggleLogsOff.addEventListener('click', function() {
-    toggleLogs('off');
-  });
-
-  const startHandler = document.getElementById('start-button');
-  startHandler.addEventListener('click', function() {
-    const ssURL = document.getElementById('url-input').value;
-    if (!ssURL) {
-      document.getElementById("url-input").focus();
-      if (state.ssURL) {
-        chrome.storage.sync.set({ ssURL: '' }, function() {
-          console.log(`Removed Google Spreadsheet URL from storage.}`)
-        });
-      }
-      return;
-    }
-    if (!ssURL.includes('docs.google')) {
-      // Invalid spreadsheet url
-      return;
-    }
-    loadSpinner();
-    if (state.ssURL !== ssURL) {
-      chrome.storage.sync.set({ ssURL }, function() {
-        console.log(`Google Spreadsheet URL saved as: ${ssURL}`)
-      });
-      state.ssURL = ssURL;
-    }
-    chrome.tabs.getSelected(null, function(tab) {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.executeScript(tab.id, {
-          "file": "content.js"
-        }, function() {
-          chrome.tabs.sendMessage(tab.id, {
-            logs: state.logs,
-            names: state.names,
-            script: state.script,
-            ssURL: state.ssURL,
-          });
-          chrome.tabs.connect(tab.id, { name: 'Hide Spinner Channel'});
-          saveTabId(tab.id);
-          chrome.runtime.onMessage.addListener(function(message) {
-            if (message === 'hideSpinner') hideSpinner();
-            if (!isNaN(parseInt(message))) saveTime(parseInt(message)); 
+  chrome.tabs.onUpdated.addListener( function (tabId, changeInfo, tab) {
+    if (changeInfo.status == 'complete') {
+      chrome.tabs.getSelected(null, function(tab) {
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          chrome.tabs.executeScript(tab.id, {
+            "file": "content.js"
+          }, function() {
+            chrome.tabs.sendMessage(tab.id, {});
           });
         });
       });
-    });
-    _gaq.push(['_trackEvent', 'Start button', 'clicked']);
-  });
-
+    }
+  })
 });

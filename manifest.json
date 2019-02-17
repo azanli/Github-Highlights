@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "Email Scraper for Mail Merge",
-  "short_name": "Email Scraper",
-  "description": "Extract names and emails from webpages for mass email marketing using Google Spreadsheets with Mail Merge",
-  "version": "1.0.0.2",
+  "name": "Git Highlight",
+  "short_name": "Git Highlight",
+  "description": "Find solutions faster!",
+  "version": "1.0.0.0",
   "author": "Andy Li",
   "icons": { 
     "16": "icon16.png",
@@ -12,16 +12,20 @@
   },
   "browser_action": {
     "default_icon": "icon128.png", 
-    "default_title": "Email Scraper Extension",
-    "default_popup": "popup.html"
+    "default_title": "Git Highlight",
+    "default_popup": "popup.html?popup=true"
   },
+  "content_scripts": [
+    {
+      "matches": ["http://www.github.com/*"],
+      "js": ["content.js"]
+    }
+  ],
   "background": {
     "scripts": ["background.js"],
     "persistent": false
   },
   "permissions": [
-    "activeTab", 
-    "<all_urls>", 
     "tabs",
     "storage",
     "http://*/",

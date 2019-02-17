@@ -1,263 +1,125 @@
 (function() {
-
-  chrome.extension.onMessage.addListener(function(message) {
-    const {
-      logs,
-      names,
-      script,
-      ssURL,
-    } = message;
-
-    if (!ssURL) {
-      return;
-    }
-
-    class Email_Scraper {
-      constructor(log = false, names = true, scriptURL = '', spreadsheetURL = '') {
-        this.currIndex = 0;
-        this.log = log;
-        this.names = names;
-        this.pendingRecursive = 1;
-        this.scriptURL = scriptURL;
-        this.spreadsheetURL = spreadsheetURL;
-        this.sourceIndex = 0;
-        this.sources = {};
-      }
-    
-      traverseDOM(email, dom = document.body) {
-        if (dom.childNodes.length === 0) {
-          let tmp = document.createElement("div");
-          tmp.appendChild(dom.cloneNode(false));
-          const value = tmp.innerHTML;
-          
-          if (value.length <= 30 && value.includes('.')) {
-            
-            let indexAt = value.indexOf('@');
-            if (indexAt > -1) {
-              let parsedValue = value;
-              while (parsedValue.includes('nbsp')) {
-                if (parsedValue.includes('&nbsp;')) {
-                  parsedValue = parsedValue.replace('&nbsp;', ' ');
-                } else if (parsedValue.includes('&nbsp')) {
-                  parsedValue = parsedValue.replace('&nbsp', ' ');
-                } else if (parsedValue.includes('nbsp;')) {
-                  parsedValue = parsedValue.replace('nbsp;', ' ');
-                } else {
-                  parsedValue = parsedValue.replace('nbsp', ' ');                  
-                }
-                indexAt = parsedValue.indexOf('@');
-              }
-              const name = parsedValue.substr(0, indexAt);
-              const alphaMap = {};
-              for (let i = 0; i < indexAt; i++) {
-                alphaMap[parsedValue[i]] = true;
-              }
-              this.sources[this.sourceIndex] = {
-                name,
-                email: parsedValue,
-                score: 0,
-                alphaMap,
-              }
-              this.sourceIndex++;
-            }
-          }
-        } else if (dom.childNodes.length) {
-          for (let i = 0; i <= dom.childNodes.length; i += 1) {
-            if (dom.childNodes[i]) {
-              this.pendingRecursive++;
-              this.traverseDOM(email, dom.childNodes[i]);
-            }
-          }
-        }
-        if (--this.pendingRecursive <= 0) {
-          this.pendingRecursive = 1;
-          if (this.log && !this.names) {
-            for (let key in this.sources) {
-              console.log(this.sources[key]['email']);
-            }
-          }
-          if (this.names) {
-            this.traverseAgainForNames(document.body);
-          } else {
-            this.submitDataToSpreadsheet();
-          }
-        }
-      };
-    
-      traverseAgainForNames(dom) {
-        if (this.sourceIndex === 0) return;
-        if (dom.childNodes.length === 0) {
-          let tmp = document.createElement("div");
-          tmp.appendChild(dom.cloneNode(false));
-          const value = tmp.innerHTML;
-          try {
-            if (value.charCodeAt(0) >= 65 && value.charCodeAt(0) <= 90 && value.length < 30 && value.length >= 5) { // Greater than 30 characters may be a sentence rather than a name.
-              Object.keys(this.sources).some(index => {
-                if (this.sources[index]['score'] > 100) return; 
-      
-                let name = this.sources[index]['name'];
-                // Incase the name has numbers appended to their last names.
-                let lastIndex = name.length - 1;
-                if (!isNaN(parseInt(name[lastIndex]))) {
-                  while (!isNaN(parseInt(name[lastIndex]))) {
-                    lastIndex--;
-                  }
-                }
-      
-                const lowerCaseName = name.toLowerCase();
-                const lowerCaseValue = value.toLowerCase();
-                if (lowerCaseName[lastIndex] === lowerCaseValue[value.length - 1] && 
-                lowerCaseName[lastIndex - 1] === lowerCaseValue[value.length - 2] && 
-                (lowerCaseName[lastIndex - 2] === lowerCaseValue[value.length - 3] || lowerCaseName[lastIndex - 2] === lowerCaseValue[0])) {
-                  if (lowerCaseName[0] === lowerCaseValue[0]) {
-                    
-                    let parsedValue = value;
-                    while (parsedValue.includes('nbsp')) {
-                      if (parsedValue.includes('&nbsp;')) {
-                        parsedValue = parsedValue.replace('&nbsp;', ' ');
-                      } else if (parsedValue.includes('&nbsp')) {
-                        parsedValue = parsedValue.replace('&nbsp', ' ');
-                      } else if (parsedValue.includes('nbsp;')) {
-                        parsedValue = parsedValue.replace('nbsp;', ' ');
-                      } else {
-                        parsedValue = parsedValue.replace('nbsp', ' ');                  
-                      }
-                    }
-      
-                    if (lowerCaseValue[0] === 'm' && (lowerCaseValue[1] === 'r' || lowerCaseValue[1] === 's')) {
-                      parsedValue = parsedValue.substr(parsedValue.indexOf(' ') + 1);
-                    }
-      
-                    let count = 0;
-                    for (let i = 0; i < parsedValue.length; i++) {
-                      if (this.sources[index]['alphaMap'][parsedValue[i]]) count += 1;
-                    }
-                    const newScore = (count / Object.keys(this.sources[index]['alphaMap']).length) * 100;
-                    if (newScore > this.sources[index]['score']) {
-                      if (this.log) console.log('New score:', newScore, 'Old score:', this.sources[index]['score']);
-                      if (this.log) console.log('Changing name from', name, 'to', parsedValue);
-                      this.sources[index]['name'] = parsedValue;
-                      this.sources[index]['score'] = newScore;
-                      return true;
-                    }
-                  }
-                }
-              });
-            }
-          } catch(e) {
-            console.error(`Error occurred while traversing for names: ${e}`)
-          }
-        } else {
-          for (let i = 0; i <= dom.childNodes.length; i += 1) {
-            if (dom.childNodes[i]) {
-              this.pendingRecursive++;
-              this.traverseAgainForNames(dom.childNodes[i]);
-            }
-          }
-        }
-        if (--this.pendingRecursive <= 0) {
-          this.pendingRecursive = 1;
-          if (this.log) console.log('Names & Emails:', this.sources);
-          if (this.spreadsheetURL && this.sourceIndex > 0) {
-            this.submitDataToSpreadsheet();
-            chrome.runtime.sendMessage(`${Date.now() + (2000 * (this.sourceIndex - 1))}`);
-          }
-        }
-        return;
-      };
-    
-      submitDataToSpreadsheet() {
-        try {
-          if (this.currIndex >= this.sourceIndex) {
-            chrome.runtime.sendMessage('hideSpinner');
-            return;
-          }
-
-          let firstName = '';
-          let lastName = '';
-          if (this.names) {
-            let name = this.sources[this.currIndex]['name'];
-            if (this.includesSpecialChars(name)) {
-              name = this.replaceSpecialChars(name);
-            }
-            if (name.charCodeAt(0) >= 97 && name.charCodeAt(0) <= 122) {
-              name = this.fixLowerCaseName(name);
-            }
-            firstName = name;
-            const lastNameIndex = name.indexOf(' ');
-            if (lastNameIndex > 0) {
-              firstName = name.substr(0, lastNameIndex);
-              const middleNameIndex = name.lastIndexOf(' ');
-              if (lastNameIndex === middleNameIndex) {
-                lastName = name.substr(lastNameIndex + 1);
-              } else {
-                lastName = name.substr(middleNameIndex + 1);
-              }
-            }
-          }
-          const email = this.sources[this.currIndex]['email'];
-          const emailName = email.substr(0, email.indexOf('@'));
-          if (firstName === emailName) {
-            firstName = '';
-          }
-
-          const data = {
-            'First Name': firstName,
-            'Last Name': lastName,
-            'Email Address': email,
-            'Spreadsheet URL': this.spreadsheetURL,
-          }
-          this.currIndex++;
-          this.handleSpreadsheetSubmit(data);
-        } catch(e) {
-          console.error(`Error submitting data to spreadsheet: ${e}`)
-        }
-      };
-    
-      handleSpreadsheetSubmit(data = {}) {
-        // data = {
-        //   'First Name': 'Test',
-        //   'Last Name': 'Testing',
-        //   'Email Address': 'test@testing.com',
-        //   'Spreadsheet URL': 'https://docs.google.com/spreadsheets/d/test_example',
-        // };
-    
-        const xhr = new XMLHttpRequest();
-        // const proxyurl = "https://cors-anywhere.herokuapp.com/";
-        const url = this.scriptURL;
-        xhr.open('POST', url, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onload = () => {
-          this.submitDataToSpreadsheet();
-        }
-        const encoded = Object.keys(data).map(function(k) {
-          return encodeURIComponent(k) + "=" + encodeURIComponent(data[k]);
-        }).join('&');
-        xhr.send(encoded);
-      }; 
-    
-      includesSpecialChars(str) {
-        return /[^A-Za-z\s-]/g.test(str);
-      }
-    
-      replaceSpecialChars(str) {
-        return str.replace(/[^A-Za-z\s-]/g, ' ');
-      }
-    
-      fixLowerCaseName(str) {
-        let fixedName = '' + str[0].toUpperCase();
-        for (let i = 1; i < str.length; i++) {
-          if (str[i] === ' ') {
-            fixedName += ' ' + str[i + 1].toUpperCase();
-            i += 1;
-          }
-          fixedName += str[i];
-        }
-        return fixedName;
-      }
-    }
-    const email_scraper = new Email_Scraper(logs, names, script, ssURL);
-    email_scraper.traverseDOM();
-  })
+  window.onpopstate = exec();
+  chrome.extension.onMessage.addListener(exec);
 })();
 
+let scrollbarRendered = false;
+
+async function exec() {
+  const host = document.location.host;
+
+  if (host === 'github.com' || host.toLowerCase() === 'github') {
+    const title = document.title;
+
+    await removeScrollbar();
+
+    if (!title.includes('Issue')) return;
+
+    let color = await getColor();
+
+    const data = collectDataRegions();
+
+    const scrollbar = document.createElement("div");
+    const body = document.body;
+    const html = document.documentElement;
+    const scrollHeight = Math.max( body.scrollHeight, body.offsetHeight, 
+      html.clientHeight, html.scrollHeight, html.offsetHeight );
+
+    const viewHeight = Math.min( body.scrollHeight, body.offsetHeight, 
+      html.clientHeight, html.scrollHeight, html.offsetHeight );
+
+    scrollbar.setAttribute('id', 'scrollbar-unique-id');
+    scrollbar.style.backgroundColor = 'transparent';
+    scrollbar.style.height = `${viewHeight}px`;
+    scrollbar.style.position = 'fixed';
+    scrollbar.style.right = 0;
+    scrollbar.style.top = 0;
+    scrollbar.style.width = '0.5em';
+
+    const dataArray = Object.keys(data);
+    for (let i = 0; i < dataArray.length; i += 1) {
+      const highlight = document.createElement("div");
+
+      const top = (dataArray[i] / scrollHeight) * viewHeight;
+
+      highlight.style.backgroundColor = color;
+      highlight.style.height = `${data[dataArray[i]]}px`;
+      highlight.style.position = 'absolute';
+      highlight.style.top = `${top}px`;
+      highlight.style.width = '0.5em';
+      scrollbar.appendChild(highlight);
+    }
+    body.appendChild(scrollbar);
+    scrollbarRendered = true;
+  } else {
+    removeScrollbar();
+  }
+}
+
+function removeScrollbar() {
+  return new Promise(function(resolve) {
+    if (scrollbarRendered) {
+      scrollbarRendered = false;
+      const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
+      scrollbarAlreadyExists.parentNode.removeChild(scrollbarAlreadyExists);
+    }
+    resolve();
+  });
+}
+
+function getColor() {
+  return new Promise(function(resolve) {
+    chrome.storage.sync.get('color', function(result) {
+      if (result['color']) {
+        resolve(result['color']);
+      } else {
+        resolve('#F1BC43');
+      }
+    });
+  });
+}
+
+function collectDataRegions() {
+  const data = {};
+  const reactionElements = document.body.getElementsByClassName('reaction-summary-item');
+  
+  for (let i = 0; i < reactionElements.length; i += 1) {
+    const element = reactionElements[i];
+    const alias = element.children[0].getAttribute('alias');
+
+    let count = extractDigits(element.innerText);
+    if (!count) continue;
+
+    if (alias === '-1' || alias === 'confused') {
+      count -= count * 2;
+    }
+
+    const top = offset(reactionElements[i]);
+
+    if (data[top]) {
+      data[top] += count;
+    } else {
+      data[top] = count;
+    }
+  }
+
+  return data;
+};
+
+
+function extractDigits(string) {
+  let digits = '';
+  for (let i = 0; i < string.length; i += 1) {
+    if (!isNaN(parseInt(string[i]))) {
+      digits += string[i];
+    }
+  }
+  return parseInt(digits);
+}
+
+
+function offset(el) {
+  const rect = el.parentElement.parentElement.parentElement.parentElement.getBoundingClientRect();
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  return rect.top + scrollTop;
+};

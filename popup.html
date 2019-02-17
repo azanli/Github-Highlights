@@ -7,51 +7,38 @@
     <script text="text/javascript" src="./background.js"></script>
     
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-127582009-1"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-127582009-2"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'UA-127582009-1');
-    </script>
 
+      gtag('config', 'UA-127582009-2');
+    </script>
     <link rel="stylesheet" type="text/css" href="./styles.css">
   </head>
   <body id="body">
     <div class="title-container">
-      <h1 class="title">Email Scraper</h1>
-      <h2 class="title subtitle">&nbsp for</h2>
-      <h1 class="title">&nbsp Mail Merge</h1>
-    </div>
-
-    <div class="toggle-container">
-      <p class="toggle-title">Show console logs</p>
-      <div class="toggle-buttons">
-          <button class="toggle-button" id="logs-on">on</button>
-          <button class="toggle-button" id="logs-off">off</button>
-      </div>
-    </div>
-
-    <div class="toggle-container">
-      <p class="toggle-title">Extract names</p>
-      <div class="toggle-buttons">
-        <button class="toggle-button" id="names-on">on</button>
-        <button class="toggle-button" id="names-off">off</button>
-      </div>
+      <h1 class="title">Git Marker</h1>
     </div>
   
-    <div class="url-container">
-      <p class="toggle-title">Google Spreadsheet URL</p>
-      <input id="url-input" placeholder="https://docs.google.com/spreadsheets/d/143FHU2kei23IFJ2isijf3iLOVEFkkfj/edit#gid=83147757" type="text" />
+    <div class="color-container">
+      <div class="color-label-container">
+        <p class="color-label">Color code:</p>
+      </div>
+      <div class="color-input-container">
+        <input autofocus id="color-input" type="text" />
+        <span id="color-box"/>
+      </div>
     </div>
 
     <button id="start-button">
-      <p id="start-text">Start</p>
-      <div id="start-loader"/>
+      <p id="start-text">Save</p>
+      <div id="start-loader" />
     </button>
 
     <div class="footer">
-      <a href="https://chrome.google.com/webstore/detail/email-scraper-for-mail-me/eboiamfelgfbnhckknboemljjccmnhhd" id="like" class="footer-text-like" target="_blank">Like us</a>
+      <a href="https://chrome.google.com/webstore/detail/email-scraper-for-mail-me/eboiamfelgfbnhckknboemljjccmnhhd" id="like" class="footer-text-like" target="_blank">&#x2665; &nbsp; Like</a>
       <a href="https://opencollective.com/email-scraper-for-mail-merge" class="footer-text" target="_blank">Donate</a>
       <a href="https://emailscraper-mailmerge.herokuapp.com" class="footer-text" target="_blank">Help</a>
     </div>
