@@ -6,18 +6,17 @@
 let scrollbarRendered = false;
 
 async function exec() {
-  const host = document.location.host;
-
-  if (host === 'github.com' || host.toLowerCase() === 'github') {
-    const title = document.title;
-
+  const origin = document.location.origin;
+  if (origin === 'https://github.com') {
     await removeScrollbar();
-    
-    if (!title.includes('Issue #')) return;
+
+    const pathname = document.location.pathname;
+    if (isNaN(parseInt(pathname[pathname.length - 1])) && !pathname.includes('/issues/')) return;
     
     let color = await getColor();
 
     const data = collectDataRegions();
+    if (Object.keys(data).length === 0) return;
 
     const scrollbar = document.createElement("div");
     const body = document.body;
@@ -51,17 +50,15 @@ async function exec() {
     }
     body.appendChild(scrollbar);
     scrollbarRendered = true;
-  } else {
-    removeScrollbar();
   }
 }
 
 function removeScrollbar() {
   return new Promise(function(resolve) {
     if (scrollbarRendered) {
-      scrollbarRendered = false;
       const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
       scrollbarAlreadyExists.parentNode.removeChild(scrollbarAlreadyExists);
+      scrollbarRendered = false;
       resolve();
     } else {
       resolve();
