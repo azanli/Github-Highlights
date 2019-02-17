@@ -6,53 +6,50 @@
 let scrollbarRendered = false;
 
 async function exec() {
-  const origin = document.location.origin;
-  if (origin === 'https://github.com') {
-    await removeScrollbar();
+  await removeScrollbar();
 
-    const pathname = document.location.pathname;
-    if (isNaN(parseInt(pathname[pathname.length - 1])) && !pathname.includes('/issues/')) return;
-    
-    const data = collectDataRegions();
-    if (Object.keys(data).length === 0) return;
+  const pathname = document.location.pathname;
+  if (isNaN(parseInt(pathname[pathname.length - 1])) && (!pathname.includes('/issues/') || !pathname.includes('/pull/'))) return;
+  
+  const data = collectDataRegions();
+  if (Object.keys(data).length === 0) return;
 
-    const settings = await getSettings();
-    const color = settings['color'] || '#F1BC43';
-    const width = settings['width'] || '15px';
+  const settings = await getSettings();
+  const color = settings['color'] || '#F1BC43';
+  const width = settings['width'] || '15px';
 
-    const scrollbar = document.createElement("div");
-    const body = document.body;
-    const html = document.documentElement;
-    const scrollHeight = Math.max( body.scrollHeight, body.offsetHeight, 
-      html.clientHeight, html.scrollHeight, html.offsetHeight );
+  const scrollbar = document.createElement("div");
+  const body = document.body;
+  const html = document.documentElement;
+  const scrollHeight = Math.max( body.scrollHeight, body.offsetHeight, 
+    html.clientHeight, html.scrollHeight, html.offsetHeight );
 
-    const viewHeight = Math.min( body.scrollHeight, body.offsetHeight, 
-      html.clientHeight, html.scrollHeight, html.offsetHeight );
+  const viewHeight = Math.min( body.scrollHeight, body.offsetHeight, 
+    html.clientHeight, html.scrollHeight, html.offsetHeight );
 
-    scrollbar.setAttribute('id', 'scrollbar-unique-id');
-    scrollbar.style.backgroundColor = 'transparent';
-    scrollbar.style.height = `${viewHeight}px`;
-    scrollbar.style.position = 'fixed';
-    scrollbar.style.right = 0;
-    scrollbar.style.top = 0;
-    scrollbar.style.width = width;
+  scrollbar.setAttribute('id', 'scrollbar-unique-id');
+  scrollbar.style.backgroundColor = 'transparent';
+  scrollbar.style.height = `${viewHeight}px`;
+  scrollbar.style.position = 'fixed';
+  scrollbar.style.right = 0;
+  scrollbar.style.top = 0;
+  scrollbar.style.width = width;
 
-    const dataArray = Object.keys(data);
-    for (let i = 0; i < dataArray.length; i += 1) {
-      const highlight = document.createElement("div");
+  const dataArray = Object.keys(data);
+  for (let i = 0; i < dataArray.length; i += 1) {
+    const highlight = document.createElement("div");
 
-      const top = (dataArray[i] / scrollHeight) * viewHeight;
+    const top = (dataArray[i] / scrollHeight) * viewHeight;
 
-      highlight.style.backgroundColor = color;
-      highlight.style.height = `${data[dataArray[i]]}px`;
-      highlight.style.position = 'absolute';
-      highlight.style.top = `${top}px`;
-      highlight.style.width = '100%';
-      scrollbar.appendChild(highlight);
-    }
-    body.appendChild(scrollbar);
-    scrollbarRendered = true;
+    highlight.style.backgroundColor = color;
+    highlight.style.height = `${data[dataArray[i]]}px`;
+    highlight.style.position = 'absolute';
+    highlight.style.top = `${top}px`;
+    highlight.style.width = '100%';
+    scrollbar.appendChild(highlight);
   }
+  body.appendChild(scrollbar);
+  scrollbarRendered = true;
 }
 
 function removeScrollbar() {

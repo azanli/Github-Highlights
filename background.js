@@ -281,13 +281,16 @@ document.addEventListener('DOMContentLoaded', function() {
   chrome.tabs.onUpdated.addListener( function (tabId, changeInfo, tab) {
     if (changeInfo.status == 'complete') {
       chrome.tabs.getSelected(null, function(tab) {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-          chrome.tabs.executeScript(tab.id, {
-            "file": "content.js"
-          }, function() {
-            chrome.tabs.sendMessage(tab.id, {});
+        const { url } = tab;
+        if ((url[8] === 'g' || url[12] === 'g') && url.includes('github')) {
+          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.executeScript(tab.id, {
+              "file": "content.js"
+            }, function() {
+              chrome.tabs.sendMessage(tab.id, {});
+            });
           });
-        });
+        }
       });
     }
   })
