@@ -2,8 +2,8 @@
   "manifest_version": 2,
   "name": "Git Highlights",
   "short_name": "Git Highlights",
-  "description": "Find solutions faster!",
-  "version": "1.0.0.3",
+  "description": "Find solutions faster in GitHub issues!",
+  "version": "1.0.1.0",
   "author": "Andy Li",
   "icons": { 
     "16": "icon16.png",
