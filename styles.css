@@ -135,13 +135,11 @@
   right: 0;
 }
 
-.title-bar-dot {
-  background-color: '#fff';
-  height: 0.2em;
-  position: absolute;
+.title-color {
+  color: #59AE4B;
 }
 
-.dot-one {
-  width: 0.2em;
-  left: 5%;
+.title-color-light {
+  color: #c1fcc1;
 }
+
