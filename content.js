@@ -12,9 +12,9 @@ async function exec() {
     const title = document.title;
 
     await removeScrollbar();
-
-    if (!title.includes('Issue')) return;
-
+    
+    if (!title.includes('Issue #')) return;
+    
     let color = await getColor();
 
     const data = collectDataRegions();
@@ -62,8 +62,10 @@ function removeScrollbar() {
       scrollbarRendered = false;
       const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
       scrollbarAlreadyExists.parentNode.removeChild(scrollbarAlreadyExists);
+      resolve();
+    } else {
+      resolve();
     }
-    resolve();
   });
 }
 
