@@ -13,10 +13,12 @@ async function exec() {
     const pathname = document.location.pathname;
     if (isNaN(parseInt(pathname[pathname.length - 1])) && !pathname.includes('/issues/')) return;
     
-    let color = await getColor();
-
     const data = collectDataRegions();
     if (Object.keys(data).length === 0) return;
+
+    const settings = await getSettings();
+    const color = settings['color'] || '#F1BC43';
+    const width = settings['width'] || '15px';
 
     const scrollbar = document.createElement("div");
     const body = document.body;
@@ -33,7 +35,7 @@ async function exec() {
     scrollbar.style.position = 'fixed';
     scrollbar.style.right = 0;
     scrollbar.style.top = 0;
-    scrollbar.style.width = '0.5em';
+    scrollbar.style.width = width;
 
     const dataArray = Object.keys(data);
     for (let i = 0; i < dataArray.length; i += 1) {
@@ -45,7 +47,7 @@ async function exec() {
       highlight.style.height = `${data[dataArray[i]]}px`;
       highlight.style.position = 'absolute';
       highlight.style.top = `${top}px`;
-      highlight.style.width = '0.5em';
+      highlight.style.width = width;
       scrollbar.appendChild(highlight);
     }
     body.appendChild(scrollbar);
@@ -66,13 +68,13 @@ function removeScrollbar() {
   });
 }
 
-function getColor() {
+function getSettings() {
   return new Promise(function(resolve) {
-    chrome.storage.sync.get('color', function(result) {
-      if (result['color']) {
-        resolve(result['color']);
+    chrome.storage.sync.get(['color', 'width'], function(result) {
+      if (result) {
+        resolve(result);
       } else {
-        resolve('#F1BC43');
+        resolve({});
       }
     });
   });
