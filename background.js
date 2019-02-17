@@ -14,7 +14,9 @@ window.onload = async function() {
   let isPopup = getUrlParameter('popup') === 'true';
   if (!isPopup) return;
 
-  const currentColor = await getColor();
+  const settings = await getSettings();
+  const currentColor = settings['color'] || '#F1BC43';
+  const currentWidth = settings['width'] || '15px';
   const colorBox = document.getElementById("color-box");
   colorBox.style.backgroundColor = currentColor;
 
@@ -23,9 +25,23 @@ window.onload = async function() {
   const startHandler = document.getElementById('start-button');
   startHandler.addEventListener('click', () => {
     setColor();
+    setWidth();
     loadSpinner();
     setTimeout(hideSpinner, 1000);
   });
+
+  const slider = document.getElementById("highlight-range");
+  slider.value =extractDigits(currentWidth);
+  const sample = document.getElementById("highlight-sample");
+  sample.style.backgroundColor = currentColor;
+  sample.style.height = '1px';
+  sample.style.width = currentWidth;
+  sample.style.marginBottom = '1em';
+
+  // Update the current slider value (each time you drag the slider handle)
+  slider.oninput = function() {
+    sample.style.width = `${this.value}px`;
+  }
 }
 
 function getUrlParameter(sParam) {
@@ -39,16 +55,22 @@ function getUrlParameter(sParam) {
   }
 }
 
-function getColor() {
+function getSettings() {
   return new Promise(function(resolve) {
-    chrome.storage.sync.get('color', function(result) {
-      if (result['color']) {
-        resolve(result['color']);
+    chrome.storage.sync.get(['color', 'width'], function(result) {
+      if (result) {
+        resolve(result);
       } else {
-        resolve('#F1BC43');
+        resolve({});
       }
     });
   });
+}
+
+function setWidth() {
+  const slider = document.getElementById("highlight-range");
+  const width = `${slider.value}px`;
+  chrome.storage.sync.set({ width });
 }
 
 function setColor() {
@@ -224,6 +246,16 @@ function checkHex(color) {
   if (color.length > 6) return false;
   if (/[g-z]/g.test(color)) return false;
   return true;
+}
+
+function extractDigits(string) {
+  let digits = '';
+  for (let i = 0; i < string.length; i += 1) {
+    if (!isNaN(parseInt(string[i]))) {
+      digits += string[i];
+    }
+  }
+  return parseInt(digits);
 }
 
 function loadSpinner() {
