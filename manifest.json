@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "Git Highlights",
-  "short_name": "Git Highlights",
+  "name": "Github Highlights",
+  "short_name": "Github Highlights",
   "description": "Find solutions faster in GitHub issues!",
-  "version": "1.0.1.0",
+  "version": "1.0.1.1",
   "author": "Andy Li",
   "icons": { 
     "16": "icon16.png",
@@ -12,7 +12,7 @@
   },
   "browser_action": {
     "default_icon": "icon128.png", 
-    "default_title": "Git Highlights",
+    "default_title": "Github Highlights",
     "default_popup": "popup.html?popup=true"
   },
   "content_scripts": [
