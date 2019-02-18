@@ -1,7 +1,7 @@
 # Github Highlights
 Highlight the highest voted comments in GitHub issues to quickly locate the best solutions.
 
-Find solutions faster in GitHub issues!
+Find solutions faster in GitHub issues! <br>
 Speed up your problem solving!
 Highlight the highest voted comments in GitHub issues to quickly locate the best solutions.
 
