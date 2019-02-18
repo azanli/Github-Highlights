@@ -3,7 +3,7 @@
   chrome.extension.onMessage.addListener(exec);
 })();
 
-let scrollbarRendered = false;
+this.SCROLLBAR_RENDERED = false;
 
 async function exec() {
   await removeScrollbar();
@@ -49,15 +49,15 @@ async function exec() {
     scrollbar.appendChild(highlight);
   }
   body.appendChild(scrollbar);
-  scrollbarRendered = true;
+  this.SCROLLBAR_RENDERED = true;
 }
 
 function removeScrollbar() {
   return new Promise(function(resolve) {
-    if (scrollbarRendered) {
+    if (this.SCROLLBAR_RENDERED) {
       const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
       scrollbarAlreadyExists.parentNode.removeChild(scrollbarAlreadyExists);
-      scrollbarRendered = false;
+      this.SCROLLBAR_RENDERED = false;
       resolve();
     } else {
       resolve();
