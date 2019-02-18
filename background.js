@@ -69,10 +69,14 @@ function getSettings() {
 }
 
 function saveSettings() {
-  setColor();
-  setWidth();
-  loadSpinner();
-  setTimeout(hideSpinner, 1000);
+  const validColor = setColor();
+  if (validColor) {
+    setWidth();
+    loadSpinner();
+    setTimeout(hideSpinner, 1000);
+  } else {
+    displayInvalidColor();
+  }
 }
 
 function setWidth() {
@@ -83,10 +87,10 @@ function setWidth() {
 
 function setColor() {
   let newColor = document.getElementById("color-input").value.toLowerCase().replace(/\s/g, '');
-  if (!newColor) return;
-  if (/[#-]\W/g.test(newColor)) return;
+  if (!newColor) return false;
+  if (/[#-]\W/g.test(newColor)) return false;
   if (newColor[0] === '#') {
-    if (newColor.length > 7) return;
+    if (newColor.length > 7) return false;
   } else {
     const validColors = {
       'aliceBlue': true,
@@ -242,16 +246,17 @@ function setColor() {
     if (!validColors[newColor]) {
       // Check whether this is a valid hexadecimal
       const pass = checkHex(newColor);
-      if (!pass) return;
+      if (!pass) return false;
 
       newColor = `#${newColor}`;
     }
   }
   chrome.storage.sync.set({ color: newColor });
+  return true;
 }
 
 function checkHex(color) {
-  if (color.length > 6) return false;
+  if (color.length > 6 && color.length !== 3 && color.length !== 6) return false;
   if (/[g-z]/g.test(color)) return false;
   return true;
 }
@@ -264,6 +269,13 @@ function extractDigits(string) {
     }
   }
   return parseInt(digits);
+}
+
+function displayInvalidColor() {
+  const colorError = document.getElementById('color-error');
+  colorError.style.color = 'red';
+  colorError.style.fontSize = '1em';
+  colorError.innerHTML = 'Invalid color';
 }
 
 function loadSpinner() {
