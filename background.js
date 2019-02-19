@@ -286,19 +286,19 @@ function loadSpinner() {
 function hideSpinner() {
   document.getElementById('start-loader').style.display = 'none';
   document.getElementById('start-text').style.display = 'block';
-  reloadPage();
+  executeContent();
   setTimeout(() => window.close(), 100);
 }
 
-function reloadPage() {
+function executeContent() {
   chrome.tabs.getSelected(null, function(tab) {
     const { url } = tab;
-    if (url.includes('/issues/')) {
+    if (url && ((url[8] === 'g' && url[9] !== 'o') || (url[12] === 'g' && url[13] !== 'o')) && url.includes('github')) {
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         chrome.tabs.executeScript(tab.id, {
           "file": "content.js"
         }, function() {
-          chrome.tabs.sendMessage(tab.id, { reload: true });
+          chrome.tabs.sendMessage(tab.id, {});
         });
       });
     }
@@ -308,19 +308,7 @@ function reloadPage() {
 document.addEventListener('DOMContentLoaded', function() {
   chrome.tabs.onUpdated.addListener( function (tabId, changeInfo, tab) {
     if (changeInfo.status == 'complete') {
-      chrome.tabs.getSelected(null, function(tab) {
-        const { url } = tab;
-        // Specifically filter out 'google' as that is the most visited website on the internet.
-        if (url && ((url[8] === 'g' && url[9] !== 'o') || (url[12] === 'g' && url[13] !== 'o')) && url.includes('github')) {
-          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            chrome.tabs.executeScript(tab.id, {
-              "file": "content.js"
-            }, function() {
-              chrome.tabs.sendMessage(tab.id, {});
-            });
-          });
-        }
-      });
+      executeContent();
     }
-  })
+  });
 });
