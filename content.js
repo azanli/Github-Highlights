@@ -30,6 +30,8 @@ async function createScrollbar() {
   const color = settings['color'] || '#F1BC43';
   const width = settings['width'] || '15px';
 
+  if (width === '0px') return;
+
   const scrollbar = document.createElement("div");
   const body = document.body;
   const html = document.documentElement;
