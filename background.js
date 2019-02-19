@@ -26,7 +26,7 @@ window.onload = async function() {
   startHandler.addEventListener('click', saveSettings);
 
   const slider = document.getElementById("highlight-range");
-  slider.value =extractDigits(currentWidth);
+  slider.value = extractDigits(currentWidth);
   const sample = document.getElementById("highlight-sample");
   sample.style.backgroundColor = currentColor;
   sample.style.height = '1px';
@@ -87,7 +87,7 @@ function setWidth() {
 
 function setColor() {
   let newColor = document.getElementById("color-input").value.toLowerCase().replace(/\s/g, '');
-  if (!newColor) return false;
+  if (newColor === '') return true;
   if (/[#-]\W/g.test(newColor)) return false;
   if (newColor[0] === '#') {
     if (newColor.length > 7) return false;
@@ -286,7 +286,23 @@ function loadSpinner() {
 function hideSpinner() {
   document.getElementById('start-loader').style.display = 'none';
   document.getElementById('start-text').style.display = 'block';
-  window.close();
+  reloadPage();
+  setTimeout(() => window.close(), 100);
+}
+
+function reloadPage() {
+  chrome.tabs.getSelected(null, function(tab) {
+    const { url } = tab;
+    if (url.includes('/issues/')) {
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.executeScript(tab.id, {
+          "file": "content.js"
+        }, function() {
+          chrome.tabs.sendMessage(tab.id, { reload: true });
+        });
+      });
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
