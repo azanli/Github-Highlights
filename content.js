@@ -3,37 +3,26 @@
   chrome.extension.onMessage.addListener(exec);
 })();
 
-this.SCROLLBAR_RENDERED = false;
-this.CURRENT_ISSUE = null
-
-async function exec(message) {
-  if (message.reload) {
-    const settings = await getSettings();
-    const color = settings['color'] || '#F1BC43';
-    const width = settings['width'] || '15px';
-    const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
-    scrollbarAlreadyExists.style.width = width;
-    const children = scrollbarAlreadyExists.children;
-    for (let i = 0; i < children.length; i += 1) {
-      children[i].style.backgroundColor = color;
-    }
+function exec(message) {
+  if (message && message.reload) {
+    reloadScrollbar();
     return;
   }
-
-  await removeScrollbar();
 
   const pathname = document.location.pathname;
-  if (isNaN(parseInt(pathname[pathname.length - 1])) && (!pathname.includes('/issues/') || !pathname.includes('/pull/'))) {
-    this.CURRENT_ISSUE = null;
+  if (isNaN(parseInt(pathname[pathname.length - 1])) &&
+    (!pathname.includes('/issues/') || !pathname.includes('/pull/'))) {
+    removeScrollbar();
     return;
-  }
-  const issue = pathname.substr(pathname.lastIndexOf('/') + 1);
-  if (this.CURRENT_ISSUE === issue) {
-    return;
-  } else {
-    this.CURRENT_ISSUE = issue;
   }
 
+  const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
+  if (scrollbarAlreadyExists) return;
+
+  createScrollbar();
+}
+
+async function createScrollbar() {
   const data = collectDataRegions();
   if (Object.keys(data).length === 0) return;
 
@@ -72,20 +61,13 @@ async function exec(message) {
     scrollbar.appendChild(highlight);
   }
   body.appendChild(scrollbar);
-  this.SCROLLBAR_RENDERED = true;
 }
 
 function removeScrollbar() {
-  return new Promise(function(resolve) {
-    if (this.SCROLLBAR_RENDERED) {
-      const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
-      scrollbarAlreadyExists.parentNode.removeChild(scrollbarAlreadyExists);
-      this.SCROLLBAR_RENDERED = false;
-      resolve();
-    } else {
-      resolve();
-    }
-  });
+  const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
+  if (scrollbarAlreadyExists) {
+    scrollbarAlreadyExists.parentNode.removeChild(scrollbarAlreadyExists);
+  }
 }
 
 function getSettings() {
@@ -144,3 +126,18 @@ function offset(el) {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   return rect.top + scrollTop;
 };
+
+async function reloadScrollbar() {
+  const settings = await getSettings();
+  const color = settings['color'] || '#F1BC43';
+  const width = settings['width'] || '15px';
+  const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
+  if (scrollbarAlreadyExists) {
+    scrollbarAlreadyExists.style.width = width;
+    const children = scrollbarAlreadyExists.children;
+    for (let i = 0; i < children.length; i += 1) {
+      children[i].style.backgroundColor = color;
+    }
+    document.getElementById('scrollbar-unique-id').replaceWith(scrollbarAlreadyExists);
+  }
+}
