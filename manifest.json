@@ -3,7 +3,7 @@
   "name": "Github Highlights",
   "short_name": "Github Highlights",
   "description": "Find solutions faster in GitHub issues!",
-  "version": "1.0.1.7",
+  "version": "1.0.1.8",
   "author": "Andy Li",
   "icons": { 
     "16": "icon16.png",
