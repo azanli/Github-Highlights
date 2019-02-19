@@ -5,12 +5,7 @@
 
 this.SCROLLBAR_RENDERED = false;
 
-async function exec(message) {
-  if (message && message.reload) {
-    location.reload();
-    return;
-  }
-
+async function exec() {
   await removeScrollbar();
 
   const pathname = document.location.pathname;
