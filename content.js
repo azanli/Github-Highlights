@@ -60,6 +60,11 @@ async function createScrollbar() {
     highlight.style.position = 'absolute';
     highlight.style.top = `${top}px`;
     highlight.style.width = '100%';
+
+    highlight.onclick = () => {
+      window.scrollTo({top: dataArray[i] - 100, behavior: 'auto'});
+    }
+    
     scrollbar.appendChild(highlight);
   }
   body.appendChild(scrollbar);
