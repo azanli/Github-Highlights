@@ -286,11 +286,11 @@ function loadSpinner() {
 function hideSpinner() {
   document.getElementById('start-loader').style.display = 'none';
   document.getElementById('start-text').style.display = 'block';
-  executeContent();
-  setTimeout(() => window.close(), 100);
+  executeContent('reload');
+  setTimeout(() => window.close(), 250);
 }
 
-function executeContent() {
+function executeContent(reload) {
   chrome.tabs.getSelected(null, function(tab) {
     const { url } = tab;
     if (url && ((url[8] === 'g' && url[9] !== 'o') || (url[12] === 'g' && url[13] !== 'o')) && url.includes('github')) {
@@ -298,7 +298,7 @@ function executeContent() {
         chrome.tabs.executeScript(tab.id, {
           "file": "content.js"
         }, function() {
-          chrome.tabs.sendMessage(tab.id, {});
+          chrome.tabs.sendMessage(tab.id, { reload });
         });
       });
     }
