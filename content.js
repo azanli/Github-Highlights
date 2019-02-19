@@ -62,7 +62,9 @@ async function createScrollbar() {
     highlight.style.width = '100%';
 
     highlight.onclick = () => {
+      highlight.style.opacity = 0.8;
       window.scrollTo({top: dataArray[i] - 100, behavior: 'auto'});
+      setTimeout(() => highlight.style.opacity = 1, 150);
     }
     
     scrollbar.appendChild(highlight);
