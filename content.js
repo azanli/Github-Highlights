@@ -16,9 +16,6 @@ function exec(message) {
     return;
   }
 
-  const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
-  if (scrollbarAlreadyExists) return;
-
   createScrollbar();
 }
 
@@ -69,7 +66,12 @@ async function createScrollbar() {
     
     scrollbar.appendChild(highlight);
   }
-  body.appendChild(scrollbar);
+    const scrollbarAlreadyExists = document.getElementById('scrollbar-unique-id');
+  if (scrollbarAlreadyExists) {
+    body.replaceChild(scrollbar, scrollbarAlreadyExists);
+  } else {
+    body.appendChild(scrollbar);
+  }
 }
 
 function removeScrollbar() {
