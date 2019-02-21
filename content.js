@@ -104,7 +104,7 @@ function collectDataRegions() {
     let count = extractDigits(element.innerText);
     if (!count) continue;
 
-    if (alias === '-1' || alias === 'confused') {
+    if (alias === '-1' || alias === 'thinking_face') {
       count -= count * 2;
     }
 
