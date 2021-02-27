@@ -104,8 +104,12 @@ function collectDataRegions() {
     let count = extractDigits(element.innerText);
     if (!count) continue;
 
-    if (alias === '-1' || alias === 'thinking_face') {
-      count -= count * 2;
+    if (alias === 'thumbs down') {
+      count -= 2;
+    } else if (alias === 'confused') {
+      count -= 1;
+    } else if (alias === 'eyes') {
+      count -= 0.5;
     }
 
     const top = offset(reactionElements[i]);
