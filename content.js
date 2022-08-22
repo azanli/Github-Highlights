@@ -47,20 +47,28 @@ async function createScrollbar() {
   scrollbar.style.width = width;
 
   const dataArray = Object.keys(data);
-  for (let i = 0; i < dataArray.length; i += 1) {
+  for (const [offset, height] of Object.entries(data)) {
+    if (height <= 0) {
+      continue;
+    }
+
     const highlight = document.createElement("div");
 
-    const top = (dataArray[i] / scrollHeight) * viewHeight;
+    const top = (offset / scrollHeight) * viewHeight;
 
     highlight.style.backgroundColor = color;
-    highlight.style.height = `${data[dataArray[i]]}px`;
+    highlight.style.height = `${height}px`;
     highlight.style.position = 'absolute';
     highlight.style.top = `${top}px`;
     highlight.style.width = '100%';
+    highlight.style.zIndex = Infinity;
+
+    highlight.style.borderWidth = '2px';
+    highlight.style.borderColor = 'transparent';
 
     highlight.onclick = () => {
       highlight.style.opacity = 0.8;
-      window.scrollTo({top: dataArray[i] - 100, behavior: 'auto'});
+      window.scrollTo({top: offset - 100, behavior: 'auto'});
       setTimeout(() => highlight.style.opacity = 1, 150);
     }
     
@@ -93,53 +101,54 @@ function getSettings() {
   });
 }
 
+function getOffset(el) {
+  const rect = el.parentElement.parentElement.parentElement.parentElement.getBoundingClientRect();
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  return rect.top + scrollTop;
+};
+
 function collectDataRegions() {
   const data = {};
-  const reactionElements = document.body.getElementsByClassName('reaction-summary-item');
+  const commentReactions = Array.from(document.getElementsByClassName('js-comment-reactions-options'))
+    .filter((comment) => comment.getElementsByTagName('g-emoji').length)
+    .map((commentWithReactions) => {
+      const offset = getOffset(commentWithReactions);
+
+      return Array.from(commentWithReactions.getElementsByClassName('social-reaction-summary-item'))
+        .map((commentReactionSummaryItem) => {
+          return {
+            alias: commentReactionSummaryItem.getElementsByClassName('social-button-emoji')[0].getAttribute('alias'),
+            count: parseInt(
+              commentReactionSummaryItem.getElementsByClassName('js-discussion-reaction-group-count')[0].textContent
+            ),
+            offset,
+          }
+        });
+    });
   
-  for (let i = 0; i < reactionElements.length; i += 1) {
-    const element = reactionElements[i];
-    const alias = element.children[0].getAttribute('alias');
+  for (const reactions of commentReactions) {
+    let score = 0;
 
-    let count = extractDigits(element.innerText);
-    if (!count) continue;
+    for (const {alias, count, offset} of reactions) {
+      if (alias === '-1') {
+        score -= 1.5 * count;
+      } else if (alias === 'thinking_face') {
+        score -= 1 * count;
+      } else if (alias === 'eyes') {
+        score -= 0.5 * count;
+      } else {
+        score += 1 * count;
+      }
 
-    if (alias === 'thumbs down') {
-      count -= 2;
-    } else if (alias === 'confused') {
-      count -= 1;
-    } else if (alias === 'eyes') {
-      count -= 0.5;
-    }
-
-    const top = offset(reactionElements[i]);
-
-    if (data[top]) {
-      data[top] += count;
-    } else {
-      data[top] = count;
+      if (data[offset]) {
+        data[offset] += score;
+      } else {
+        data[offset] = score;
+      }
     }
   }
 
   return data;
-};
-
-
-function extractDigits(string) {
-  let digits = '';
-  for (let i = 0; i < string.length; i += 1) {
-    if (!isNaN(parseInt(string[i]))) {
-      digits += string[i];
-    }
-  }
-  return parseInt(digits);
-}
-
-
-function offset(el) {
-  const rect = el.parentElement.parentElement.parentElement.parentElement.getBoundingClientRect();
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-  return rect.top + scrollTop;
 };
 
 async function reloadScrollbar() {
