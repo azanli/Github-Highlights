@@ -12,14 +12,13 @@ _gaq.push(['_trackPageview']);
 
 window.onload = async function() {
   let isPopup = getUrlParameter('popup') === 'true';
-  console.log('ispopup', isPopup);
   if (!isPopup) return;
 
   const settings = await getSettings();
   const currentColor = settings['color'] || '#F1BC43';
   const currentWidth = settings['width'] || '15px';
-  const colorBox = document.getElementById("color-box");
-  colorBox.style.backgroundColor = currentColor;
+
+  setSampleColor(currentColor);
 
   document.getElementById("color-input").setAttribute('placeholder', currentColor);
 
@@ -73,6 +72,11 @@ function saveSettings() {
   } else {
     displayInvalidColor();
   }
+}
+
+function setSampleColor(color) {
+  const colorBox = document.getElementById("color-box");
+  colorBox.style.backgroundColor = color;
 }
 
 function setWidth() {
@@ -247,6 +251,7 @@ function setColor() {
       newColor = `#${newColor}`;
     }
   }
+  setSampleColor(newColor);
   chrome.storage.sync.set({ color: newColor });
   return true;
 }
