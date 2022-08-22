@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Github Highlights",
   "short_name": "Github Highlights",
-  "description": "Find solutions faster in GitHub issues!",
+  "description": "Find solutions faster in GitHub!",
   "version": "1.1.0",
   "author": "Andy Li",
   "icons": { 
