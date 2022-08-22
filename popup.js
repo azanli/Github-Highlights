@@ -1,8 +1,5 @@
 'use strict';
 
-const window = self ?? window;
-const document = window.document;
-
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-127582009-2']);
 _gaq.push(['_trackPageview']);
@@ -15,6 +12,7 @@ _gaq.push(['_trackPageview']);
 
 window.onload = async function() {
   let isPopup = getUrlParameter('popup') === 'true';
+  console.log('ispopup', isPopup);
   if (!isPopup) return;
 
   const settings = await getSettings();
@@ -30,6 +28,7 @@ window.onload = async function() {
 
   const slider = document.getElementById("highlight-range");
   slider.value = extractDigits(currentWidth);
+
   const sample = document.getElementById("highlight-sample");
   sample.style.backgroundColor = currentColor;
   sample.style.height = '1px';
@@ -40,12 +39,6 @@ window.onload = async function() {
   slider.oninput = function() {
     sample.style.width = `${this.value}px`;
   }
-
-  document.addEventListener('keyup', function (e) {
-    if (e.which == 13) {
-      saveSettings();
-    }
-  });
 }
 
 function getUrlParameter(sParam) {
