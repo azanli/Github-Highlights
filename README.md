@@ -1,5 +1,5 @@
 # Github Highlights
-Highlight the highest voted comments in GitHub issues to quickly locate the best solutions.
+Highlight the highest voted comments in GitHub to quickly locate the best solutions.
 
 Find solutions faster in GitHub! <br>
 Speed up your problem solving!
